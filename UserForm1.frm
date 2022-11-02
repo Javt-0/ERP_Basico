@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
    Caption         =   "UserForm1"
-   ClientHeight    =   8664.001
+   ClientHeight    =   7656
    ClientLeft      =   108
    ClientTop       =   456
-   ClientWidth     =   6624
+   ClientWidth     =   5976
    OleObjectBlob   =   "UserForm1.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End
@@ -21,12 +21,14 @@ Private Sub CommandButton1_Click()
     Else
         If CommandButton1.Caption = "Añadir" And Frame1.Caption = "Productos" Then
             Call CambioAñadir(True, False, "Productos", "Añadir")
-            TextBox1.Enabled = False
-            TextBox1 = numfila() + 1
+            TextBox6.Enabled = False
+            TextBox6 = numfila() + 1
         Else
             If CommandButton1.Caption = "Añadir" And Frame1.Caption = "Ventas" Then
                 Call CambioAñadir(True, False, "Ventas", "Añadir")
                 CommandButton7.Enabled = False
+                TextBox6.Enabled = False
+                TextBox6 = numfilaHoja3() + 1
             End If
         End If
     End If
@@ -82,7 +84,10 @@ Private Sub CommandButton2_Click()
             Call CambioAñadir(True, False, "Productos", "Modificar")
         Else
             If CommandButton2.Caption = "Modificar" And Frame1.Caption = "Ventas" Then
+            
                 Call CambioAñadir(True, False, "Ventas", "Modificar")
+                Label4.Caption = "Cantidad"
+                'TextBox2 = "Venta " + ID
                 CommandButton7.Enabled = False
             End If
         End If
@@ -100,24 +105,25 @@ Private Sub CommandButton3_Click()
             Call cambioBtn("Volver", "Productos", "Ventas", "Analisis de ventas")
         End If
     End If
-    
-        
 End Sub
 
 Private Sub CommandButton4_Click()
+    Call limpiar
+End Sub
+
+Private Sub limpiar()
     Frame2.Visible = False
     CommandButton2.Enabled = True
     CommandButton3.Enabled = True
     CommandButton1.Enabled = True
     CommandButton7.Enabled = True
-    TextBox1.Text = ""
+    TextBox6.Text = ""
     TextBox2.Text = ""
     TextBox3.Text = ""
     TextBox4.Text = ""
     TextBox5.Text = ""
     TextBox6.Enabled = True
 End Sub
-
 Private Sub CommandButton5_Click()
     If CommandButton5.Caption = "Añadir" Then
         Call añadir
@@ -145,21 +151,39 @@ Private Sub añadir()
         Hoja2.Cells(fila, 3) = TextBox4.Value
         Hoja2.Cells(fila, 2) = ID
         Hoja2.Cells(fila, 1) = ID
+        TextBox6 = ID
     Else
         If Frame1.Caption = "Ventas" Then
-            
+            Hoja3.Cells(fila, 1) = numfilaHoja3() + 1
+            Hoja3.Cells(fila, 2) = TextBox2.Value
+            Hoja3.Cells(fila, 3) = TextBox3.Value
+            Hoja3.Cells(fila, 3) = TextBox4.Value
+            TextBox6 = numfilaHoja3() + 1
         End If
     End If
-    
-    TextBox1.Enabled = True
+    Call limpiar
 End Sub
 
 Private Sub modificar()
-    If Frame1.Caption = "Productos" Then
+    Dim opcion As Integer
+    Dim fila As Integer
+    Dim ID As Integer
+    fila = Val(TextBox6.Text) + 2
+    ID = numfila() + 1
+    opcion = MsgBox("¿Esta seguro que quiere modificar los datos?", vbYesNo, "Modificar usuario")
     
+    If Frame1.Caption = "Productos" And opcion = 6 Then
+            
+            Hoja1.Cells(fila, 2) = TextBox2.Value
+            Hoja1.Cells(fila, 3) = TextBox3.Value
+            Hoja2.Cells(fila, 3) = TextBox4.Value
+            
     Else
-        If Frame1.Caption = "Ventas" Then
-        
+        If Frame1.Caption = "Ventas" And opcion = 6 Then
+            
+            Hoja3.Cells(fila, 2) = TextBox2.Value
+            Hoja3.Cells(fila, 3) = TextBox3.Value
+            Hoja3.Cells(fila, 3) = TextBox4.Value
         End If
     End If
 End Sub
@@ -180,6 +204,8 @@ End Sub
 
 Private Sub buscar()
     Dim numfil As Integer
+    Dim numfil2 As Integer
+    
     If Frame1.Caption = "Productos" Then
         'LLamamos a la funcion para obtener el numero de filas que no estan vacias'
         numfil = numfila()
@@ -196,11 +222,10 @@ Private Sub buscar()
     Else
         If Frame1.Caption = "Ventas" Then
             'LLamamos a la funcion para obtener el numero de filas que no estan vacias'
-            numfil = numfila()
+            numfil2 = numfilaHoja3()
             'MsgBox numfil'
-            'val()-> cambia de tipo del contenido del textbox5'
-            If Val(TextBox6.Text) >= 1 And Val(TextBox6.Text) <= numfil Then
-                TextBox1.Text = Hoja3.Cells(Val(TextBox6.Text) + 2, 2)
+            If Val(TextBox6.Text) >= 1 And Val(TextBox6.Text) <= numfil2 Then
+                TextBox6.Text = Hoja3.Cells(Val(TextBox6.Text) + 2, 2)
                 TextBox2.Text = Hoja1.Cells(Val(TextBox6.Text) + 2, 2)
                 TextBox3.Text = Hoja1.Cells(Val(TextBox6.Text) + 2, 3)
                 TextBox4.Text = Hoja3.Cells(Val(TextBox6.Text) + 2, 3)
@@ -226,40 +251,15 @@ Private Function numfila() As Integer
     numfila = i - 3
 End Function
 
-Private Sub Frame2_Click()
-
-End Sub
-
-Private Sub TextBox1_Change()
+Private Function numfilaHoja3() As Integer
+    'Funcion que cuenta las celdas que estan ocupadas en fila es decir cuantas filas hay'
+    Dim i As Integer
+    i = 3
     
-End Sub
-
-Private Sub TextBox4_Change()
-
-End Sub
-'quitar el id de producto y usar solo el que tiene el boton'
-'al momento de poner el id del producto en venta que aparezca el nombre auto
-'al momento de modificar algo que el btn modificar este desactivado hasta que se de al btn buscar
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    Do While Hoja3.Cells(i, 2) <> ""
+        i = i + 1
+    Loop
+    
+    numfilaHoja3 = i - 3
+End Function
 
